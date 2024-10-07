@@ -34,12 +34,13 @@ class TransactionCreateResponse(RWModel):
     transaction_type: str
     transaction_amount: float
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    full_name: str
     model_config = ConfigDict(
         populate_by_name=True,
         json_encoders={datetime: convert_datetime_to_realworld},
     )
 
-    @model_validator(mode='after')
+    @model_validator(mode='before')
     def decrypt_sensitive_data(cls, values):
         # Decrypt full_name
         if "full_name" in values:

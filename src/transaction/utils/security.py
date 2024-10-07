@@ -1,5 +1,6 @@
 import os
 from cryptography.fernet import Fernet
+from loguru import logger
 
 # Load the Fernet key from an environment variable
 FERNET_KEY = os.getenv("FERNET_KEY")
@@ -13,4 +14,4 @@ def encrypt_field(value: str) -> str:
 
 def decrypt_field(value: str) -> str:
     """Decrypt a field after retrieving from the database."""
-    return fernet.decrypt(value.encode()).decode()
+    return fernet.decrypt(value).decode()

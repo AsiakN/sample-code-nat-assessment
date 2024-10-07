@@ -11,23 +11,20 @@ def pytest_namespace():
     }
 
 
-@pytest.mark.asyncio
-async def test_create_transaction_valid_input(transaction_payload):
+@pytest.mark.asyncio(loop_scope='session')
+def test_create_transaction_valid_input(transaction_payload):
     with TestClient(app) as c:
-        response = c.post(f"api/v1/transactions", json=transaction_payload)
-        assert response.status_code == 201
+        response = c.post(f"api/v1/transactions/", json=transaction_payload)
+    assert response.status_code == 201
 
-        pytest.user_id = response.json().get('user_id')
-        pytest.id = response.json().get('_id')
-        response_json = response.json()
-        assert response_json["user_id"] == transaction_payload["user_id"]
-        assert response_json["transaction_currency"] == "USD"
+    response_json = response.json()
+    assert response_json["user_id"] == transaction_payload["user_id"]
+    assert response_json["transaction_currency"] == "USD"
 
 
-@pytest.mark.asyncio
-async def test_create_transaction_invalid_request():
-    with TestClient(app) as c:
-        response = c.post(f"api/v1/transactions", json={
+def test_create_transaction_invalid_request():
+    with TestClient(app=app) as c:
+        response = c.post("api/v1/transactions", json={
             "user_id": "e7tyewrkjtty",
             "full_name": "Jane Doe",
             "transaction_amount": 475.66,
@@ -36,12 +33,12 @@ async def test_create_transaction_invalid_request():
             "transaction_currency": "USD"
         })
 
-        assert response.status_code == 422
+    assert response.status_code == 422
 
 
 def test_create_update_transaction(transaction_payload, transaction_payload_updated):
-    with TestClient(app) as c:
-        response = c.post("/api/v1/transactions", json=transaction_payload)
+    with TestClient(app=app) as c:
+        response = c.post("api/v1/transactions", json=transaction_payload)
         transaction_id = response.json().get("_id")
 
         assert response.status_code == 201
@@ -52,13 +49,13 @@ def test_create_update_transaction(transaction_payload, transaction_payload_upda
         )
         assert response.status_code == 200
         response_json = response.json()
-        assert response_json['transaction_type'] == transaction_payload_updated['transaction_type']
-        assert response_json['user_id'] == transaction_payload['user_id']
+        assert response_json['data']['transaction_type'] == transaction_payload_updated['transaction_type']
+        assert response_json['data']['user_id'] == transaction_payload['user_id']
 
 
 def test_update_transaction_doesnt_exist(transaction_id, transaction_payload_updated):
-    with TestClient(app) as c:
-        response = c.put(f"/api/v1/transactions/{transaction_id}", json=transaction_payload_updated)
+    with TestClient(app=app, ) as c:
+        response = c.put(f"api/v1/transactions/{transaction_id}", json=transaction_payload_updated)
         assert response.status_code == 404
         response_json = response.json()
         assert response_json["detail"] == f"Transaction not found"
@@ -86,8 +83,7 @@ def test_update_user_wrong_payload(transaction_id, transaction_payload_updated):
         }
 
 
-@pytest.mark.asyncio(loop_scope="session")
-async def test_create_delete_transaction(transaction_payload):
+def test_create_delete_transaction(transaction_payload):
     with TestClient(app) as c:
         response = c.post(f"api/v1/transactions", json=transaction_payload)
         transaction_id = response.json().get("_id")
@@ -98,11 +94,27 @@ async def test_create_delete_transaction(transaction_payload):
 
 
 @pytest.mark.asyncio
-async def test_fetch_transaction_history(transaction_payload):
+def test_fetch_transaction_history(transaction_payload):
     with TestClient(app) as c:
         response = c.post(f"api/v1/transactions", json=transaction_payload)
-        user_id = response.json().get("user_id")
+        data = response.json().get("data")
+        user_id = data['user_id']
         assert response.status_code == 201
 
         response = c.get(f"/api/v1/transactions/{user_id}")
         assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+def test_fetch_transaction_analytics(transaction_payload):
+    with TestClient(app) as c:
+        response = c.post(f"api/v1/transactions", json=transaction_payload)
+        response = c.post(f"api/v1/transactions", json=transaction_payload)
+        data = response.json().get("data")
+        user_id = data['user_id']
+        assert response.status_code == 201
+
+        response = c.get(f"/api/v1/transactions/{user_id}/analytics")
+        assert response.status_code == 200
+        response_json = response.json()
+        assert float(response_json['data']['average_transaction_value']) == transaction_payload['transaction_amount']

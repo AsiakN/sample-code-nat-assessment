@@ -15,7 +15,7 @@ from src.transaction.services.transaction_service import TransactionService
 router = APIRouter()
 
 
-@router.post("/api/v1/transactions", tags=["Transactions"], response_model=TransactionCreateResponse, status_code=201)
+@router.post("/api/v1/transactions", tags=["Transactions"], response_model=SingleDataResponseModel, status_code=201)
 @inject
 async def create_transaction_request(
         payload: TransactionCreateRequest,
@@ -25,15 +25,17 @@ async def create_transaction_request(
     """
     try:
         response = await transaction_service.create_transaction(payload)
-        return response
+        return SingleDataResponseModel(is_successful=True,
+                                       message="Transaction created successfully",
+                                       data=response.dict())
     except Exception as e:
         raise HTTPException(status_code=500, detail=e)
 
 
-@router.put("/api/v1/transactions/{transaction_id}", tags=["Transactions"], response_model=TransactionCreateResponse)
+@router.put("/api/v1/transactions/{transaction_id}", tags=["Transactions"], response_model=SingleDataResponseModel)
 @inject
 async def update_transaction_details(
-        identifier: str,
+        transaction_id: str,
         payload: TransactionUpdateRequest,
         transaction_service: TransactionService = Depends(Provide[Container.transaction_service])):
     """
@@ -41,10 +43,10 @@ async def update_transaction_details(
     """
 
     try:
-        response = await transaction_service.update_transaction(identifier, payload)
+        response = await transaction_service.update_transaction(transaction_id, payload)
         return SingleDataResponseModel(is_successful=True,
                                        message="Transaction updated successfully",
-                                       data=response)
+                                       data=response.dict())
 
     except TransactionRecordNotFoundError:
         raise HTTPException(status_code=404, detail="Transaction not found")
@@ -56,13 +58,13 @@ async def update_transaction_details(
 @router.delete("/api/v1/transactions/{transaction_id}", tags=["Transactions"], status_code=204)
 @inject
 async def delete_finance_request(
-        identifier: str,
+        transaction_id: str,
         transaction_service: TransactionService = Depends(Provide[Container.transaction_service])):
     """
     Endpoint to delete transaction record
     """
     try:
-        response = await transaction_service.delete_transaction(identifier)
+        response = await transaction_service.delete_transaction(transaction_id)
         return response
     except TransactionRecordNotFoundError:
         raise HTTPException(status_code=404, detail="Transaction record not found")
@@ -71,8 +73,8 @@ async def delete_finance_request(
 @router.get("/api/v1/transactions/{user_id}", tags=["Transactions"], response_model=PagedHttpResponseModel)
 @inject
 async def get_transaction_history(
+        user_id: str,
         request: Request,
-        identifier: str,
         page: int = 1,
         page_size: int = 10,
         transaction_service: TransactionService = Depends(Provide[Container.transaction_service])):
@@ -80,7 +82,7 @@ async def get_transaction_history(
     Endpoint to retrieve transaction history for a user
     """
 
-    response = await transaction_service.fetch_transaction_history(identifier)
+    response = await transaction_service.fetch_transaction_history(user_id, request)
 
     return PagedHttpResponseModel(is_successful=True,
                                   message="operation completed successfully",
@@ -92,16 +94,18 @@ async def get_transaction_history(
 @router.get("/api/v1/transactions/{user_id}/analytics", tags=["Transactions"])
 @inject
 async def get_transaction_analytics(user_id: str,
+                                    request: Request,
                                     start_date:  Optional[datetime] = None,
                                     end_date: Optional[datetime] = None,
                                     transaction_service: TransactionService = Depends(
-                                        Provide[Container.transaction_service])):
+                                        Provide[Container.transaction_service])
+                                    ):
     """
     Endpoint to retrieve transaction analytics for a user
     @Query params = start_date
     @Query params = end_date
     """
-    response = await transaction_service.fetch_transaction_analytics(user_id)
+    response = await transaction_service.fetch_transaction_analytics(user_id, request)
     logger.info(response)
     return SingleDataResponseModel(is_successful=True,
                                    message="Successfully retrieved stats",

@@ -8,9 +8,6 @@ from src.bootstrap.containers import Container
 from src.transaction.api import transaction_route
 from src.transaction.services.redis_service import RedisService
 
-LOCAL_REDIS_URL = "redis://127.0.0.1:6379"
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -18,7 +15,8 @@ async def lifespan(app: FastAPI):
     :param app:
     :return:
     """
-    redis = await aioredis.from_url(LOCAL_REDIS_URL)
+    REDIS_URL = os.getenv("REDIS_URL")
+    redis = await aioredis.from_url(REDIS_URL)
     app.state.redis_service = RedisService(redis)  # Store RedisService in app state
     yield
     await redis.close()

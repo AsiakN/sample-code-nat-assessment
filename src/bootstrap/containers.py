@@ -10,11 +10,8 @@ class Container(containers.DeclarativeContainer):
     transaction_repository = providers.Factory(
         TransactionRepository
     )
+
     transaction_service = providers.Factory(
         TransactionService,
-        transaction_repository=transaction_repository,
-    )
-
-    redis_service = providers.Factory(
-
+        transaction_repository=transaction_repository
     )

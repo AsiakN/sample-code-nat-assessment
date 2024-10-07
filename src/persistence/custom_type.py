@@ -14,7 +14,7 @@ class DecimalCodec(TypeCodec):
         return Decimal128(value)
 
     def transform_bson(self, value):
-        """Function that transforms a vanilla BSON type value into our
+        """Function that transforms a BSON type value into our
         custom type."""
         return value.to_decimal()
 

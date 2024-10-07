@@ -16,6 +16,7 @@ services:
         environment:
           - FERNET_KEY=BwuQpxs4XabnxsM0ebdxc3E4BnhbIqPoFVFddTuEby4=
           - MONGODB_URL=mongodb://fido-nat-assessment-mongodb-1
+          - REDIS_URL=redis://fido-nat-assessment-redis-cache-1
         depends_on:
           - mongodb
 

@@ -31,7 +31,7 @@ class TransactionRepository:
         update_transaction = await transaction_collection.find_one_and_update(
             {"_id": ObjectId(transaction_id)},
             {"$set": transaction_data},
-            # return_document=ReturnDocument.AFTER,
+            return_document=ReturnDocument.AFTER,
         )
         return update_transaction
 
@@ -118,4 +118,6 @@ class TransactionRepository:
 
         result = await result.to_list()
 
-        return result[0]
+        if result:
+            return result[0]
+        return None

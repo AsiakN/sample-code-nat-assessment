@@ -5,13 +5,14 @@ import asyncio
 import pytest
 
 
-# @pytest.fixture(scope="session")
-# def event_loop():
-#     """Create an instance of the event loop for tests."""
-#     loop = asyncio.get_event_loop_policy().new_event_loop()
-#     yield loop
-#     loop.close()
+from pytest_asyncio import is_async_test
 
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
 
 # Fixture to generate a random user id
 @pytest.fixture()

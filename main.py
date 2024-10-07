@@ -2,6 +2,7 @@ import os
 from contextlib import asynccontextmanager
 
 import aioredis
+import uvicorn
 from fastapi import FastAPI
 
 from src.bootstrap.containers import Container
@@ -42,3 +43,9 @@ app = create_app()
 @app.get("/")
 async def _():
     return {"detail": "Fido API is up and running"}
+
+if __name__ == "__main__":
+    if os.getenv('APP_ENV') == 'development':
+        uvicorn.run("main:app", host="127.0.0.1", port=8000, log_level="debug", reload=True)
+    else:
+        uvicorn.run("main:app", host="127.0.0.1", port=8000, log_level="debug")

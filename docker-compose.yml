@@ -1,0 +1,48 @@
+version: "2.1"
+
+services:
+    fido-processor:
+        env_file:
+            - .env
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: on-failure
+        command: "uvicorn main:app --reload --host 0.0.0.0 --port 8989"
+        volumes:
+            - ./app:/app/app
+        ports:
+            - "8989:8989"
+        environment:
+          - FERNET_KEY=BwuQpxs4XabnxsM0ebdxc3E4BnhbIqPoFVFddTuEby4=
+          - MONGODB_URL=mongodb://fido-nat-assessment-mongodb-1
+        depends_on:
+          - mongodb
+
+  # MongoDB Database
+    mongodb:
+      image: mongo:latest
+      env_file:
+        .env
+      ports:
+        - '27017:27017'
+      healthcheck:
+        test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
+        interval: 10s
+        timeout: 10s
+        retries: 5
+        start_period: 5s
+      command:
+        mongod --quiet --logpath /dev/null
+
+    redis-cache:
+      image: redis:alpine
+      restart: on-failure
+      ports:
+        - '6379:6379'
+      command: redis-server
+#      volumes:
+#        - cache:/data
+
+volumes:
+    fido-processor-db-data:

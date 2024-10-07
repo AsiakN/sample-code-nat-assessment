@@ -6,7 +6,7 @@
 The goal of this technical design document is to design a backend system capable of powering a transactions and user interactions for fido. Much of the requirements is stated in the “Fido Backend Engineer Home Assignment” document.
 
 ### System Architecture
-![Blank diagram]()
+![Blank diagram](https://github.com/AsiakN/fido-nat-assessment/blob/master/system_architecture.png)
 A REST API written in FastAPI will feed from MongoDB to serve the external parties.
 A strategy for scaling this is to have multiple instances of the REST API and consumer running respectively. That way, our system is optimized for availability. With multiple instances of the REST API running, we introduce a load balancer to ensure that requests are efficiently distributed between all instances of the REST API.
 

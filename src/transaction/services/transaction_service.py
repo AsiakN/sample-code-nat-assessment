@@ -69,7 +69,6 @@ class TransactionService:
 
         records = await self._repository.fetch_user_transaction_history(user_id)
         mapped_response = parse_obj_as(List[TransactionCreateResponse], records)
-        logger.info(mapped_response)
         if records:
             # Convert the Pydantic objects into JSON serializable data
             encoded_response = jsonable_encoder(mapped_response)

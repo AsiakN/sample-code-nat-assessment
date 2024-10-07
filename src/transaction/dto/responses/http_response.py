@@ -22,7 +22,7 @@ class PagedHttpResponseModel(HttpResponseModel):
     page: int = 1
     page_size: int
     # total: int
-    data: List
+    data: Optional[Any]
 
 
 PyObjectId = Annotated[str, BeforeValidator(str)]

@@ -1,9 +1,7 @@
-## About Fido Take Home
-
 ### TECHNICAL DESIGN FOR A BACKEND SYSTEM CAPABLE OF POWERING A TRANSACTION AND USER INTERACTION SERVICE
 
 ### Objective
-The goal of this technical design document is to design a backend system capable of powering a transactions and user interactions for fido. Much of the requirements is stated in the “Fido Backend Engineer Home Assignment” document.
+The goal of this technical design document is to design a backend system capable of powering a transactions and user interactions. 
 
 ### System Architecture
 ![Blank diagram](https://github.com/AsiakN/fido-nat-assessment/blob/master/system_architecture.png)

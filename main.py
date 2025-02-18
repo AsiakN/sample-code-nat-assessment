@@ -29,7 +29,7 @@ def create_app() -> FastAPI:
         transaction_route
     ])
 
-    app = FastAPI(title="Fido Assessment API", lifespan=lifespan)
+    app = FastAPI(title="Assessment API", lifespan=lifespan)
     app.container = container
 
     app.include_router(transaction_route.router)
@@ -42,7 +42,7 @@ app = create_app()
 
 @app.get("/")
 async def _():
-    return {"detail": "Fido API is up and running"}
+    return {"detail": "API is up and running"}
 
 if __name__ == "__main__":
     if os.getenv('APP_ENV') == 'development':
